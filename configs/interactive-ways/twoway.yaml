@@ -1,0 +1,87 @@
+# pytorch_lightning==2.2.2
+seed_everything: 42
+data:
+  vision_ckpt_name: openai/clip-vit-base-patch32
+  text_ckpt_name: openai/clip-vit-base-patch32
+  dataset_version: mmsd-v2
+  train_batch_size: 64
+  val_batch_size: 128
+  test_batch_size: 128
+  num_workers: 16
+model:
+  clip_ckpt_name: openai/clip-vit-base-patch32
+  vision_embed_dim: 768
+  text_embed_dim: 512
+  vision_num_layers: 12
+  text_num_layers: 12
+  vision_cond_attn_mode: top-4
+  text_cond_attn_mode: top-4
+  is_v2t_adapter_mlp: true
+  is_t2v_adapter_mlp: false
+  memo_size: 1024
+  use_memo: true
+  embed_size: 1024
+  use_sim_loss: true
+  use_lora: true
+  lora_modules:
+    - k_proj
+    - v_proj
+    - out_proj
+  lora_rank: 8
+  lora_alpha: 8
+  lora_dropout: 0.1
+  lora_lr: 1e-4
+  learning_rate: 5e-4
+  num_warmup_rate: 0.2
+  min_lr_rate: 0.01
+  is_compiled: false
+trainer:
+  precision: 16-mixed
+  fast_dev_run: false
+  max_epochs: 3
+  overfit_batches: 0
+  val_check_interval: null
+  check_val_every_n_epoch: 1
+  log_every_n_steps: 50
+  enable_checkpointing: true
+  enable_progress_bar: true
+  enable_model_summary: true
+  accumulate_grad_batches: 1
+  gradient_clip_val: null
+  gradient_clip_algorithm: null
+  deterministic: true
+  profiler: null
+  detect_anomaly: false
+  use_distributed_sampler: false
+  default_root_dir: /data/chenjunjie/mmsd-results
+  logger:
+    - class_path: pytorch_lightning.loggers.TensorBoardLogger
+      init_args: 
+        save_dir: /data/chenjunjie/mmsd-results/tb_logs
+        name: 'twoway'
+    - class_path: pytorch_lightning.loggers.CSVLogger
+      init_args:
+        save_dir: /data/chenjunjie/mmsd-results/csv_logs
+        name: 'twoway'
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        monitor: val/BinaryAccuracy
+        mode: max
+        save_top_k: 1
+        filename: mmsd-epoch={epoch:02d}-val_acc={val/BinaryAccuracy:.2f}
+        auto_insert_metric_name: false
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        monitor: val/loss
+        mode: min
+        save_top_k: 1
+        filename: mmsd-epoch={epoch:02d}-val_loss={val/loss:.2f}
+        auto_insert_metric_name: false
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        monitor: val/BinaryF1Score
+        mode: max
+        save_top_k: 1
+        filename: mmsd-epoch={epoch:02d}-val_f1={val/BinaryF1Score:.2f}
+        auto_insert_metric_name: false
