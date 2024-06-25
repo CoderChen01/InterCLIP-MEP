@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MMSD: mmsd",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/mmsd/__main__.py",
+      "args": ["fit", "-c", "configs/best.yaml", "--run-test"],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Python: Debug Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "purpose": ["debug-test", "debug-in-terminal"],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "presentation": {
+        "hidden": true // keep original launch order in 'run and debug' tab
+      }
+    }
+  ]
+}

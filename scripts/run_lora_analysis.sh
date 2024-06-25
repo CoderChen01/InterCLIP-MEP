@@ -26,6 +26,6 @@ config_files_list=(
 )
 for config_file in "${config_files_list[@]}"; do
   for modules in "${modules_list[@]}"; do
-    mmsd fit -c "$config_file" --model.lora_modules "$modules" --search-memo-size --run-test --result-save-path /data/chenjunjie/mmsd-results/lora_module_study.csv
+    mmsd fit -c "$config_file" --model.lora_modules "$modules" --search-memo-size --run-test --result-save-path ./lora_module_study.csv
   done
 done

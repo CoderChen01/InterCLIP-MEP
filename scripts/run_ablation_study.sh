@@ -8,9 +8,9 @@ config_files_list=(
 )
 for config_file in "${config_files_list[@]}"; do
     # w/o proj.
-    mmsd fit -c "$config_file" --model.use_sim_loss false --model.use_memo false  --run-test --result-save-path /data/chenjunjie/mmsd-results/ablation_study.csv
+    mmsd fit -c "$config_file" --model.use_sim_loss false --model.use_memo false  --run-test --result-save-path ./ablation_study.csv
     # w/o mep
-    mmsd fit -c "$config_file"  --model.use_memo false --run-test --result-save-path /data/chenjunjie/mmsd-results/ablation_study.csv
+    mmsd fit -c "$config_file"  --model.use_memo false --run-test --result-save-path ./ablation_study.csv
     # w/o lora
-    mmsd fit -c "$config_file" --model.use_lora false --search-memo-size --run-test --result-save-path /data/chenjunjie/mmsd-results/ablation_study.csv
+    mmsd fit -c "$config_file" --model.use_lora false --search-memo-size --run-test --result-save-path ./ablation_study.csv
 done

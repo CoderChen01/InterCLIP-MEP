@@ -1,32 +1,21 @@
-# InterCLIP-MEP: Interactive CLIP with Memory-Enhanced Predictor for Multi-modal Sarcasm Detection
+# 😼InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection [![arXiv](https://img.shields.io/badge/arXiv-2406.16464-b31b1b.svg)](https://arxiv.org/abs/2406.16464)
 
-## Abstract
-With the rise of social media, people often use sarcasm, expressed through text and images, to convey emotions.
-Automatically detecting sarcasm from multi-modal data (such as text and images) benefits tasks like sentiment analysis and intention mining.
-The task of multi-modal sarcasm detection has garnered widespread attention.
-However, existing works have been validated on a benchmark (MMSD) that contains spurious cues.
-This results in models learning biases from these spurious cues, failing to truly capture interactive information from different modalities to detect sarcasm.
-This motivated us to introduce a novel and robust multi-modal sarcasm detection framework (InterCLIP-MEP).
-InterCLIP-MEP mainly consists of two modules: Interactive-CLIP and the Memory-Enhanced Predictor (MEP).
-Interactive-CLIP is used as the backbone for extracting sample representations.
-Building on the general CLIP model, it conditions the text and visual encoders by embedding representations from the other modality into the encoder, thereby more effectively capturing interactions between different modalities, which is crucial for multi-modal sarcasm detection.
-The core of multi-modal sarcasm detection is discovering the inconsistencies between images and text.
-During inference, InterCLIP-MEP does not simply use a classification module to detect sarcasm from sample representations; instead, it uses a dynamic memory maintained by the MEP.
-This memory stores the most valuable historical knowledge of test samples.
-Using this memory as a non-parametric classifier is more robust than directly using a classification module for sarcasm detection.
-Additional experiments validated the effectiveness of InterCLIP-MEP, achieving state-of-the-art performance on the more reliable MMSD2.0 benchmark.
+## 📄Abstract
+
+The prevalence of sarcasm in social media, conveyed through text-image combinations, presents significant challenges for sentiment analysis and intention mining.
+Current multi-modal sarcasm detection methods have been proven to struggle with biases from spurious cues, leading to a superficial understanding of the complex interactions between text and image.
+To address these issues, we propose InterCLIP-MEP, a robust framework for multi-modal sarcasm detection.
+InterCLIP-MEP introduces a refined variant of CLIP, Interactive CLIP (InterCLIP), as the backbone, enhancing sample representations by embedding cross-modality information in each encoder.
+Furthermore, a novel training strategy is designed to adapt InterCLIP for a Memory-Enhanced Predictor (MEP).
+MEP uses dynamic dual-channel memory to store valuable historical knowledge of test samples and then leverages this memory as a non-parametric classifier to derive the final prediction.
+By using InterCLIP to encode text-image interactions more effectively and incorporating MEP, InterCLIP-MEP offers a more robust recognition of multi-modal sarcasm.
+Experiments demonstrate that InterCLIP-MEP achieves state-of-the-art performance on the MMSD2.0 benchmark.
 
 <center>
 <img src="./docs/framework.svg" alt="Framework overview"/>
 </center>
 
-## Running the code
-
-```shell
-mmsd fit -c configs/best.yaml --run-test --search-memo-size
-```
-
-## Installation
+## ℹ️Installation
 
 ### Virtual Environment
 
@@ -43,14 +32,16 @@ pyenv install 3.9
 Then, create a virtual environment with the following command:
 
 ```bash
-pyenv virtualenv 3.9 mmsd
+pyenv virtualenv 3.9.19 mmsd-3.9.19
 ```
 
 Finally, activate the virtual environment:
 
 ```bash
-pyenv activate mmsd
+pyenv activate mmsd-3.9.19
 ```
+
+You can also create the virtual environment in any way you prefer.
 
 ### Dependencies
 
@@ -61,3 +52,82 @@ Then, install the dependencies with the following command:
 ```bash
 poetry install
 ```
+
+## ⚗️Reproduce Results
+
+[![Dataset on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/dataset-on-hf-sm.svg)](https://huggingface.co/datasets/coderchen01/MMSD2.0/)
+
+```shell
+# Main results
+./scripts/run_main_results.sh
+```
+
+<details>
+<summary>Click to see the results</summary>
+<center>
+<img src="./docs/main-results.png" alt="Main Results" style="width: 80%"/>
+</center>
+</details>
+
+```shell
+# Ablation study
+./scripts/run_ablation_study.sh
+```
+
+<details>
+<summary>Click to see the results</summary>
+<center>
+<img src="./docs/ablation.png" alt="Ablation Study" style="width: 50%"/>
+</center>
+</details>
+
+```shell
+# LoRA analysis
+./scripts/run_lora_analysis.sh
+```
+
+<details>
+<summary>Click to see the results</summary>
+<center>
+<img src="./docs/lora.png" alt="LoRA Analysis" style="width: 50%"/>
+</center>
+</details>
+
+```shell
+# Hyperparameter study for InterCLIP-MEP w/ T2V
+./scripts/run_hyperparam_study.sh
+```
+
+<details>
+<summary>Click to see the results</summary>
+<center>
+<img src="./docs/hyperparameter.png" alt="Hyperparameter Study" style="width: 50%"/>
+</center>
+</details>
+
+## 🤗Acknowledgement
+
+- [Hugging Face](https://huggingface.co/)
+- [CLIP](https://github.com/openai/CLIP)
+- [MMSD2.0 benchmark](https://github.com/JoeYing1019/MMSD2.0?tab=readme-ov-file)
+
+## 📃Reference
+
+If you find this project useful for your research, please consider citing the following paper:
+
+```bibtex
+@article{chen2024interclipmep,
+  title   = {InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection},
+  author  = {Junjie Chen and Subin Huang},
+  year    = {2024},
+  journal = {arXiv preprint arXiv: 2406.16464}
+}
+```
+
+## 📝License
+
+See the [LICENSE](./LICENSE.md) file for license rights and limitations (MIT).
+
+## 📧Contact
+
+If you have any questions about our work, please do not hesitate to contact [Junjie Chen](mailto:jorji.chen@gmail.com).

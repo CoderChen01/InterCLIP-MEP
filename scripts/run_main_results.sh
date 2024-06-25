@@ -7,5 +7,5 @@ config_files_list=(
   'configs/interactive-ways/t2v.yaml'
 )
 for config_file in "${config_files_list[@]}"; do
-    mmsd fit -c "$config_file" --search-memo-size --run-test --result-save-path /data/chenjunjie/mmsd-results/main-results.csv
+    mmsd fit -c "$config_file" --search-memo-size --run-test --result-save-path ./main-results.csv
 done

@@ -280,7 +280,7 @@ class LitMMSDModel(pl.LightningModule):
         if self.predictor is None:
             raise ValueError("predictor is not initialized")
         batch.pop("id")
-        memo_pred = self.predictor(batch)
+        memo_pred, _, _ = self.predictor(batch)
         memo_label = torch.argmax(memo_pred, dim=-1)
         self.test_metric_macro.update(memo_pred, batch["label"])
         self.test_metric_binary.update(memo_label, batch["label"])
