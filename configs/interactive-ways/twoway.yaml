@@ -53,15 +53,15 @@ trainer:
   profiler: null
   detect_anomaly: false
   use_distributed_sampler: false
-  default_root_dir: /data/chenjunjie/mmsd-results
+  default_root_dir: /path/to/mmsd-results
   logger:
     - class_path: pytorch_lightning.loggers.TensorBoardLogger
       init_args: 
-        save_dir: /data/chenjunjie/mmsd-results/tb_logs
+        save_dir: /path/to/mmsd-results/tb_logs
         name: 'twoway'
     - class_path: pytorch_lightning.loggers.CSVLogger
       init_args:
-        save_dir: /data/chenjunjie/mmsd-results/csv_logs
+        save_dir: /path/to/mmsd-results/csv_logs
         name: 'twoway'
   callbacks:
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint

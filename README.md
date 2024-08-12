@@ -2,14 +2,7 @@
 
 ## 📄Abstract
 
-The prevalence of sarcasm in social media, conveyed through text-image combinations, presents significant challenges for sentiment analysis and intention mining.
-Current multi-modal sarcasm detection methods have been proven to struggle with biases from spurious cues, leading to a superficial understanding of the complex interactions between text and image.
-To address these issues, we propose InterCLIP-MEP, a robust framework for multi-modal sarcasm detection.
-InterCLIP-MEP introduces a refined variant of CLIP, Interactive CLIP (InterCLIP), as the backbone, enhancing sample representations by embedding cross-modality information in each encoder.
-Furthermore, a novel training strategy is designed to adapt InterCLIP for a Memory-Enhanced Predictor (MEP).
-MEP uses dynamic dual-channel memory to store valuable historical knowledge of test samples and then leverages this memory as a non-parametric classifier to derive the final prediction.
-By using InterCLIP to encode text-image interactions more effectively and incorporating MEP, InterCLIP-MEP offers a more robust recognition of multi-modal sarcasm.
-Experiments demonstrate that InterCLIP-MEP achieves state-of-the-art performance on the MMSD2.0 benchmark.
+The prevalence of sarcasm in social media, conveyed through text-image combinations, presents significant challenges for sentiment analysis and intention mining. Existing multi-modal sarcasm detection methods have been proven to overestimate performance, as they struggle to effectively capture the intricate sarcastic cues that arise from the interaction between an image and text. To address these issues, we propose InterCLIP-MEP, a novel framework for multi-modal sarcasm detection. Specifically, we introduce an Interactive CLIP (InterCLIP) as the backbone to extract text-image representations, enhancing them by embedding cross-modality information directly within each encoder, thereby improving the representations to capture text-image interactions better. Furthermore, an efficient training strategy is designed to adapt InterCLIP for our proposed Memory-Enhanced Predictor (MEP). MEP uses a dynamic, fixed-length dual-channel memory to store historical knowledge of valuable test samples during inference. It then leverages this memory as a non-parametric classifier to derive the final prediction, offering a more robust recognition of multi-modal sarcasm. Experiments demonstrate that InterCLIP-MEP achieves state-of-the-art performance on the [MMSD2.0](https://aclanthology.org/2023.findings-acl.689) benchmark, with an accuracy improvement of 1.08% and an F1 score improvement of 1.51% over the previous best method.
 
 <center>
 <img src="./docs/framework.svg" alt="Framework overview"/>
@@ -52,6 +45,18 @@ Then, install the dependencies with the following command:
 ```bash
 poetry install
 ```
+
+## ⚠️Dataset preprocessing
+
+We use [datasets](https://huggingface.co/docs/datasets/en/index) library to read the dataset.
+
+Therefore, we provide a script [convert_mmsd2_to_imagefolder_data.py](./scripts/convert_mmsd2_to_imagefolder_data.py) to convert MMSD2.0 into a format readable by the Hugging Face datasets library and upload it to Hugging Face.
+Please follow the instructions in [MMSD2.0](https://github.com/JoeYing1019/MMSD2.0?tab=readme-ov-file) to prepare the data.
+
+Then, modify line 12 in [convert_mmsd2_to_imagefolder_data.py](./scripts/convert_mmsd2_to_imagefolder_data.py) to specify the dataset path. Next, change line 64 to the name of the dataset you wish to upload to Hugging Face (before doing this, you must first login using `huggingface-cli`, for details see: https://huggingface.co/docs/datasets/en/upload_dataset#upload-with-python).
+Afterwards, run the script `python scripts/convert_mmsd2_to_imagefolder_data.py`.
+
+Finally, you need to modify line 69 in the [dataset.py](./mmsd/dataset.py) file to specify the name of the dataset you uploaded.
 
 ## ⚗️Reproduce Results
 
@@ -116,11 +121,14 @@ poetry install
 If you find this project useful for your research, please consider citing the following paper:
 
 ```bibtex
-@article{chen2024interclipmep,
-  title   = {InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection},
-  author  = {Junjie Chen and Subin Huang},
-  year    = {2024},
-  journal = {arXiv preprint arXiv: 2406.16464}
+@misc{chen2024interclipmep,
+      title={InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection}, 
+      author={Junjie Chen and Hang Yu and Weidong Liu and Subin Huang and Sanmin Liu},
+      year={2024},
+      eprint={2406.16464},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2406.16464}, 
 }
 ```
 

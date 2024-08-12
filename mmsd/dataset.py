@@ -66,7 +66,7 @@ class MMSDDatasetModule(pl.LightningDataModule):
 
         self.dataset = cast(
             Dataset,
-            load_dataset("coderchen01/MMSD2.0", name=self.dataset_version),
+            load_dataset("<username>/MMSD2.0", name=self.dataset_version),
         )
         self.dataset.set_transform(
             partial(
