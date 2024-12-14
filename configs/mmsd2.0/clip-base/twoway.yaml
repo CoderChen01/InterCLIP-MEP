@@ -3,22 +3,26 @@ seed_everything: 42
 data:
   vision_ckpt_name: openai/clip-vit-base-patch32
   text_ckpt_name: openai/clip-vit-base-patch32
+  dataset_name_or_path: <!your-dataset-name-or-path!>
   dataset_version: mmsd-v2
   train_batch_size: 64
   val_batch_size: 128
   test_batch_size: 128
+  max_length: 77
   num_workers: 16
 model:
-  clip_ckpt_name: openai/clip-vit-base-patch32
+  clip_vision_model: openai/clip-vit-base-patch32
+  clip_text_model: openai/clip-vit-base-patch32
+  is_openclip: false
   vision_embed_dim: 768
   text_embed_dim: 512
   vision_num_layers: 12
   text_num_layers: 12
   vision_cond_attn_mode: top-4
-  text_cond_attn_mode: none
+  text_cond_attn_mode: top-4
   is_v2t_adapter_mlp: true
   is_t2v_adapter_mlp: false
-  memo_size: 640
+  memo_size: 1024
   use_memo: true
   embed_size: 1024
   use_sim_loss: true
@@ -53,16 +57,16 @@ trainer:
   profiler: null
   detect_anomaly: false
   use_distributed_sampler: false
-  default_root_dir: /path/to/mmsd-results
+  default_root_dir: mmsd-results
   logger:
     - class_path: pytorch_lightning.loggers.TensorBoardLogger
       init_args: 
-        save_dir: /path/to/mmsd-results/tb_logs
-        name: 't2v'
+        save_dir: mmsd-results/tb_logs
+        name: 'twoway'
     - class_path: pytorch_lightning.loggers.CSVLogger
       init_args:
-        save_dir: /path/to/mmsd-results/csv_logs
-        name: 't2v'
+        save_dir: mmsd-results/csv_logs
+        name: 'twoway'
   callbacks:
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint
       init_args:

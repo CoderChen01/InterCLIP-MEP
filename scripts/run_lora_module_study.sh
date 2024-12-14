@@ -19,13 +19,13 @@ modules_list=(
   '["q_proj", "k_proj", "v_proj", "out_proj"]'
 )
 config_files_list=(
-  'configs/interactive-ways/t2v.yaml'
-  'configs/interactive-ways/v2t.yaml'
-  'configs/interactive-ways/twoway.yaml'
-  'configs/interactive-ways/w-o-inter.yaml'
+  'configs/mmsd2.0/clip-base/t2v.yaml'
+  'configs/mmsd2.0/clip-base/v2t.yaml'
+  'configs/mmsd2.0/clip-base/twoway.yaml'
+  'configs/mmsd2.0/clip-base/w-o-inter.yaml'
 )
 for config_file in "${config_files_list[@]}"; do
   for modules in "${modules_list[@]}"; do
-    mmsd fit -c "$config_file" --model.lora_modules "$modules" --search-memo-size --run-test --result-save-path ./lora_module_study.csv
+    mmsd fit -c "$config_file" --model.lora_modules "$modules" --search-memo-size --run-test --result-save-path mmsd2-results/lora_module_study.csv
   done
 done

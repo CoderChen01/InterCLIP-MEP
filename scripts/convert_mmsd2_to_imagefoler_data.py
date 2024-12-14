@@ -7,11 +7,50 @@ import datasets as dt
 import jsonlines
 from tqdm import tqdm
 
-VERSION_TYPE = t.Literal["mmsd-v2"]
+VERSION_TYPE = t.Literal["mmsd-v1", "mmsd-v2", "mmsd-clean"]
 
-MMSD2_DATASET_DIR = Path("/path/to/mmsd2/dataset")
+MMSD2_DATASET_DIR = Path("/path/to/mmsd2.0")
 
-VERSION_NAME_MAP = {"mmsd-v2": "text_json_final"}
+VERSION_NAME_MAP = {
+    "mmsd-v1": "original",
+    "mmsd-v2": "text_json_final",
+}
+
+
+def read_orignal(split_path: Path) -> list[dict[str, t.Any]]:
+    lines = split_path.read_text().splitlines()
+
+    all_data = []
+    for line in lines:
+        data = eval(line)
+        text = data[1].split()
+
+        if "sarcasm" in text:
+            continue
+        if "sarcastic" in text:
+            continue
+        if "reposting" in text:
+            continue
+        if "<url>" in text:
+            continue
+        if "joke" in text:
+            continue
+        if "humour" in text:
+            continue
+        if "humor" in text:
+            continue
+        if "jokes" in text:
+            continue
+        if "irony" in text:
+            continue
+        if "ironic" in text:
+            continue
+        if "exgag" in text:
+            continue
+
+        all_data.append({"image_id": data[0], "text": data[1], "label": int(data[-1])})
+
+    return all_data
 
 
 def convert(version: VERSION_TYPE) -> None:
@@ -31,7 +70,11 @@ def convert(version: VERSION_TYPE) -> None:
         metadata_writer = jsonlines.Writer(metadata_file)
 
         # copy images and write metadata
-        data = json.loads((data_dir / f"{split}.json").read_text())
+        if version == "mmsd-v1":
+            split = f"{split}2" if split != "train" else split
+            data = read_orignal(data_dir / f"{split}.txt")
+        else:
+            data = json.loads((data_dir / f"{split}.json").read_text())
 
         for d in tqdm(data, desc=f"Converting {version} {split} data"):
             image_id = d["image_id"]
@@ -51,14 +94,17 @@ def convert(version: VERSION_TYPE) -> None:
             shutil.copy(image_path, split_dir / f"{image_id}.jpg")
 
 
-def publish(version: VERSION_TYPE, repo_id: str) -> None:
+def publish(version: VERSION_TYPE, repo_id: str, commit_message: str = "") -> None:
     converted_data_dir = MMSD2_DATASET_DIR / f"{version}-converted"
     dataset = t.cast(
         dt.Dataset, dt.load_dataset("imagefolder", data_dir=str(converted_data_dir))
     )
-    dataset.push_to_hub(repo_id, config_name=version)
+    dataset.push_to_hub(repo_id, config_name=version, commit_message=commit_message)
 
 
 if __name__ == "__main__":
+    convert("mmsd-v1")
     convert("mmsd-v2")
-    publish("mmsd-v2", "<username>/MMSD2.0")
+
+    publish("mmsd-v1", "<username>/<repo-id>", commit_message="add mmsd-v1")
+    publish("mmsd-v2", "<username>/<repo-id>")

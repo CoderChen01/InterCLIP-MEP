@@ -1,7 +1,10 @@
 import logging
 import time
-from typing import Optional, Tuple, Union, cast
+from collections import defaultdict
+from pathlib import Path
+from typing import Any, Optional, Tuple, Union, cast
 
+import pandas
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -25,7 +28,9 @@ class LitMMSDModel(pl.LightningModule):
 
     def __init__(
         self,
-        clip_ckpt_name: str,
+        clip_vision_model: str,
+        clip_text_model: str,
+        is_openclip: bool,
         vision_embed_dim: int,
         text_embed_dim: int,
         vision_num_layers: int,
@@ -52,7 +57,9 @@ class LitMMSDModel(pl.LightningModule):
         super().__init__()
 
         # model
-        self.clip_ckpt_name = clip_ckpt_name
+        self.clip_vision_model = clip_vision_model
+        self.clip_text_model = clip_text_model
+        self.is_openclip = is_openclip
         self.vision_embed_dim = vision_embed_dim
         self.text_embed_dim = text_embed_dim
         self.vision_num_layers = vision_num_layers
@@ -89,6 +96,7 @@ class LitMMSDModel(pl.LightningModule):
                 is_success = True
             except Exception:
                 logger.warning("Failed to initialize the model, retrying...")
+                logger.error("Failed to initialize the model", exc_info=True)
                 time.sleep(10)
                 continue
 
@@ -114,6 +122,7 @@ class LitMMSDModel(pl.LightningModule):
         self.test_metric_binary = binary_metrics.clone(prefix="test_binary/")
 
         self.predictor = None
+        self.case_study_results = defaultdict(list)
 
         self.save_hyperparameters()
 
@@ -190,7 +199,9 @@ class LitMMSDModel(pl.LightningModule):
 
     def _init_model(self) -> None:
         config = MMSDConfig(
-            clip_ckpt_name=self.clip_ckpt_name,
+            clip_vision_model=self.clip_vision_model,
+            clip_text_model=self.clip_text_model,
+            is_openclip=self.is_openclip,
             vision_embed_dim=self.vision_embed_dim,
             text_embed_dim=self.text_embed_dim,
             vision_conditional_layer_ids=self._get_conditional_layer_ids(
@@ -279,9 +290,85 @@ class LitMMSDModel(pl.LightningModule):
     def test_step(self, batch: MMSDModelInput) -> None:
         if self.predictor is None:
             raise ValueError("predictor is not initialized")
-        batch.pop("id")
-        memo_pred, _, _ = self.predictor(batch)
+        ids = cast(list[str], batch.pop("id"))
+        memo_pred, pred, entropy = self.predictor(batch)
+
         memo_label = torch.argmax(memo_pred, dim=-1)
+        cls_label = torch.argmax(pred, dim=-1)
+
+        true_idx = memo_label == batch["label"]
+        filtered_ids = [ids[i] for i in torch.nonzero(true_idx).squeeze(-1).tolist()]
+        memory_true_idx = (
+            torch.nonzero(cls_label[true_idx] != memo_label[true_idx])
+            .squeeze(-1)
+            .tolist()
+        )
+        cls_memory_true_idx = (
+            torch.nonzero(cls_label[true_idx] == memo_label[true_idx])
+            .squeeze(-1)
+            .tolist()
+        )
+        for idx in memory_true_idx:
+            self.case_study_results["id"].append(filtered_ids[idx])
+            self.case_study_results["label"].append(
+                batch["label"][true_idx][idx].item()
+            )
+            self.case_study_results["pred"].append(cls_label[true_idx][idx].item())
+            self.case_study_results["memo_pred"].append(
+                memo_label[true_idx][idx].item()
+            )
+            self.case_study_results["entropy"].append(entropy[true_idx][idx].item())
+            self.case_study_results["type"].append("TrueWithOnlyMemory")
+        for idx in cls_memory_true_idx:
+            self.case_study_results["id"].append(filtered_ids[idx])
+            self.case_study_results["label"].append(
+                batch["label"][true_idx][idx].item()
+            )
+            self.case_study_results["pred"].append(cls_label[true_idx][idx].item())
+            self.case_study_results["memo_pred"].append(
+                memo_label[true_idx][idx].item()
+            )
+            self.case_study_results["entropy"].append(entropy[true_idx][idx].item())
+            self.case_study_results["type"].append("TrueWithMemoryAndCls")
+
+        true_idx = cls_label == batch["label"]
+        filtered_ids = [ids[i] for i in torch.nonzero(true_idx).squeeze(-1).tolist()]
+        cls_true_idx = (
+            torch.nonzero(cls_label[true_idx] != memo_label[true_idx])
+            .squeeze(-1)
+            .tolist()
+        )
+        for idx in cls_true_idx:
+            self.case_study_results["id"].append(filtered_ids[idx])
+            self.case_study_results["label"].append(
+                batch["label"][true_idx][idx].item()
+            )
+            self.case_study_results["pred"].append(cls_label[true_idx][idx].item())
+            self.case_study_results["memo_pred"].append(
+                memo_label[true_idx][idx].item()
+            )
+            self.case_study_results["entropy"].append(entropy[true_idx][idx].item())
+            self.case_study_results["type"].append("TrueWithOnlyCls")
+
+        false_idx = memo_label != batch["label"]
+        filtered_ids = [ids[i] for i in torch.nonzero(false_idx).squeeze(-1).tolist()]
+        cls_memo_false_idx = (
+            torch.nonzero(cls_label[false_idx] == memo_label[false_idx])
+            .squeeze(-1)
+            .tolist()
+        )
+        for idx in cls_memo_false_idx:
+            self.case_study_results["id"].append(filtered_ids[idx])
+            self.case_study_results["label"].append(
+                batch["label"][false_idx][idx].item()
+            )
+            self.case_study_results["pred"].append(cls_label[false_idx][idx].item())
+            self.case_study_results["memo_pred"].append(
+                memo_label[false_idx][idx].item()
+            )
+            self.case_study_results["entropy"].append(entropy[false_idx][idx].item())
+            self.case_study_results["type"].append("FalseWithMemoryAndCls")
+
         self.test_metric_macro.update(memo_pred, batch["label"])
         self.test_metric_binary.update(memo_label, batch["label"])
 
@@ -294,6 +381,14 @@ class LitMMSDModel(pl.LightningModule):
         self.test_metric_binary.reset()
         del self.predictor
         self.predictor = None
+
+        assert self.trainer.log_dir is not None and self.trainer.ckpt_path is not None
+        case_study_path = (
+            Path(self.trainer.log_dir)
+            / f"case_study_{Path(self.trainer.ckpt_path).name}.csv"
+        )
+        pandas.DataFrame(self.case_study_results).to_csv(case_study_path, index=False)
+        self.case_study_results.clear()
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
         lora_params = []

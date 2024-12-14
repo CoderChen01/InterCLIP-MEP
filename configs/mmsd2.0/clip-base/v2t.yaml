@@ -3,13 +3,17 @@ seed_everything: 42
 data:
   vision_ckpt_name: openai/clip-vit-base-patch32
   text_ckpt_name: openai/clip-vit-base-patch32
+  dataset_name_or_path: <!your-dataset-name-or-path!>
   dataset_version: mmsd-v2
   train_batch_size: 64
   val_batch_size: 128
   test_batch_size: 128
+  max_length: 77
   num_workers: 16
 model:
-  clip_ckpt_name: openai/clip-vit-base-patch32
+  clip_vision_model: openai/clip-vit-base-patch32
+  clip_text_model: openai/clip-vit-base-patch32
+  is_openclip: false
   vision_embed_dim: 768
   text_embed_dim: 512
   vision_num_layers: 12
@@ -53,15 +57,15 @@ trainer:
   profiler: null
   detect_anomaly: false
   use_distributed_sampler: false
-  default_root_dir: /path/to/mmsd-results
+  default_root_dir: mmsd-results
   logger:
     - class_path: pytorch_lightning.loggers.TensorBoardLogger
       init_args: 
-        save_dir: /path/to/mmsd-results/tb_logs
+        save_dir: mmsd-results/tb_logs
         name: "v2t"
     - class_path: pytorch_lightning.loggers.CSVLogger
       init_args:
-        save_dir: /path/to/mmsd-results/csv_logs
+        save_dir: mmsd-results/csv_logs
         name: "v2t"
   callbacks:
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint

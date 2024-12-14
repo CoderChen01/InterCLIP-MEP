@@ -2,7 +2,11 @@
 
 ## 📄Abstract
 
-The prevalence of sarcasm in social media, conveyed through text-image combinations, presents significant challenges for sentiment analysis and intention mining. Existing multi-modal sarcasm detection methods have been proven to overestimate performance, as they struggle to effectively capture the intricate sarcastic cues that arise from the interaction between an image and text. To address these issues, we propose InterCLIP-MEP, a novel framework for multi-modal sarcasm detection. Specifically, we introduce an Interactive CLIP (InterCLIP) as the backbone to extract text-image representations, enhancing them by embedding cross-modality information directly within each encoder, thereby improving the representations to capture text-image interactions better. Furthermore, an efficient training strategy is designed to adapt InterCLIP for our proposed Memory-Enhanced Predictor (MEP). MEP uses a dynamic, fixed-length dual-channel memory to store historical knowledge of valuable test samples during inference. It then leverages this memory as a non-parametric classifier to derive the final prediction, offering a more robust recognition of multi-modal sarcasm. Experiments demonstrate that InterCLIP-MEP achieves state-of-the-art performance on the [MMSD2.0](https://aclanthology.org/2023.findings-acl.689) benchmark, with an accuracy improvement of 1.08% and an F1 score improvement of 1.51% over the previous best method.
+Sarcasm in social media, often expressed through text-image combinations, poses challenges for sentiment analysis and intention mining.
+Current multi-modal sarcasm detection methods have been shown to overestimate performance due to reliance on spurious cues, which fail to effectively capture the intricate interactions between text and images.
+To solve this problem, we propose InterCLIP-MEP, a novel framework for multi-modal sarcasm detection, which introduces Interactive CLIP (InterCLIP) to extract enriched text-image representations by embedding cross-modal information directly into each encoder.
+Additionally, we design a Memory-Enhanced Predictor (MEP) with a dynamic dual-channel memory that stores valuable test sample knowledge during inference, acting as a non-parametric classifier for robust sarcasm recognition.
+Experiments on two benchmarks demonstrate that InterCLIP-MEP achieves state-of-the-art performance, with significant accuracy and F1 score improvements on MMSD and MMSD2.0.
 
 <center>
 <img src="./docs/framework.svg" alt="Framework overview"/>
@@ -53,10 +57,12 @@ We use [datasets](https://huggingface.co/docs/datasets/en/index) library to read
 Therefore, we provide a script [convert_mmsd2_to_imagefolder_data.py](./scripts/convert_mmsd2_to_imagefolder_data.py) to convert MMSD2.0 into a format readable by the Hugging Face datasets library and upload it to Hugging Face.
 Please follow the instructions in [MMSD2.0](https://github.com/JoeYing1019/MMSD2.0?tab=readme-ov-file) to prepare the data.
 
-Then, modify line 12 in [convert_mmsd2_to_imagefolder_data.py](./scripts/convert_mmsd2_to_imagefolder_data.py) to specify the dataset path. Next, change line 64 to the name of the dataset you wish to upload to Hugging Face (before doing this, you must first login using `huggingface-cli`, for details see: https://huggingface.co/docs/datasets/en/upload_dataset#upload-with-python).
+Then, modify line 12 in [convert_mmsd2_to_imagefolder_data.py](./scripts/convert_mmsd2_to_imagefolder_data.py) to specify the dataset path. Next, change lines 109-110 to the name of the dataset you wish to upload to Hugging Face (before doing this, you must first login using `huggingface-cli`, for details see: https://huggingface.co/docs/datasets/en/upload_dataset#upload-with-python).
 Afterwards, run the script `python scripts/convert_mmsd2_to_imagefolder_data.py`.
 
-Finally, you need to modify line 69 in the [dataset.py](./mmsd/dataset.py) file to specify the name of the dataset you uploaded.
+To use the OpenCLIP checkpoint, you need to directly run `scripts/openclip2interclip.py`.
+
+Finally, you need to specify the name of the dataset you uploaded and some necessary paths in all config files.
 
 ## ⚗️Reproduce Results
 
@@ -64,7 +70,10 @@ Finally, you need to modify line 69 in the [dataset.py](./mmsd/dataset.py) file 
 
 ```shell
 # Main results
-./scripts/run_main_results.sh
+./scripts/run_main_results-clip-base-MMSD.sh
+./scripts/run_main_results-clip-base-MMSD2.0.sh
+./scripts/run_main_results-clip-roberta-MMSD.sh
+./scripts/run_main_results-clip-roberta-MMSD2.0.sh
 ```
 
 <details>
@@ -114,7 +123,9 @@ Finally, you need to modify line 69 in the [dataset.py](./mmsd/dataset.py) file 
 
 - [Hugging Face](https://huggingface.co/)
 - [CLIP](https://github.com/openai/CLIP)
+- [OpenCLIP](https://github.com/mlfoundations/open_clip)
 - [MMSD2.0 benchmark](https://github.com/JoeYing1019/MMSD2.0?tab=readme-ov-file)
+- [MMSD benchmark](https://github.com/wrk226/pytorch-multimodal_sarcasm_detection)
 
 ## 📃Reference
 
@@ -123,7 +134,7 @@ If you find this project useful for your research, please consider citing the fo
 ```bibtex
 @misc{chen2024interclipmep,
       title={InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection}, 
-      author={Junjie Chen and Hang Yu and Weidong Liu and Subin Huang and Sanmin Liu},
+      author={Junjie Chen and Hang Yu and Weidong Liu and Subin Huang and Sanmin Liu and Linfeng Zhang},
       year={2024},
       eprint={2406.16464},
       archivePrefix={arXiv},

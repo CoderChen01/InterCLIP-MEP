@@ -2,19 +2,23 @@
 seed_everything: 42
 data:
   vision_ckpt_name: openai/clip-vit-base-patch32
-  text_ckpt_name: openai/clip-vit-base-patch32
+  text_ckpt_name: FacebookAI/roberta-base
+  dataset_name_or_path: <!your-dataset-name-or-path!>
   dataset_version: mmsd-v2
   train_batch_size: 64
   val_batch_size: 128
   test_batch_size: 128
+  max_length: 256
   num_workers: 16
 model:
-  clip_ckpt_name: openai/clip-vit-base-patch32
+  clip_vision_model: <!converted-ckpt-path!>/vision
+  clip_text_model: <!converted-ckpt-path!>/text
+  is_openclip: true
   vision_embed_dim: 768
-  text_embed_dim: 512
+  text_embed_dim: 768
   vision_num_layers: 12
   text_num_layers: 12
-  vision_cond_attn_mode: top-4
+  vision_cond_attn_mode: none
   text_cond_attn_mode: top-4
   is_v2t_adapter_mlp: true
   is_t2v_adapter_mlp: false
@@ -24,9 +28,9 @@ model:
   use_sim_loss: true
   use_lora: true
   lora_modules:
-    - k_proj
-    - v_proj
-    - out_proj
+    - key
+    - value
+    - output.dense
   lora_rank: 8
   lora_alpha: 8
   lora_dropout: 0.1
@@ -53,16 +57,16 @@ trainer:
   profiler: null
   detect_anomaly: false
   use_distributed_sampler: false
-  default_root_dir: /path/to/mmsd-results
+  default_root_dir: mmsd-results
   logger:
     - class_path: pytorch_lightning.loggers.TensorBoardLogger
       init_args: 
-        save_dir: /path/to/mmsd-results/tb_logs
-        name: 'twoway'
+        save_dir: mmsd-results/tb_logs
+        name: "v2t"
     - class_path: pytorch_lightning.loggers.CSVLogger
       init_args:
-        save_dir: /path/to/mmsd-results/csv_logs
-        name: 'twoway'
+        save_dir: mmsd-results/csv_logs
+        name: "v2t"
   callbacks:
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint
       init_args:

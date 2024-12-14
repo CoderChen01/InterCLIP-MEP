@@ -23,6 +23,9 @@ from transformers.models.clip.configuration_clip import (
 )
 from transformers.utils import ModelOutput, logging
 
+
+from .interactive_roberta import RobertaModel, RobertaConfig
+
 logger = logging.get_logger(__name__)
 
 
@@ -364,7 +367,7 @@ class CLIPPreTrainedModel(PreTrainedModel):
 
     def _init_weights(self, module):
         """Initialize the weights"""
-        factor = self.config.initializer_factor
+        factor = getattr(self.config, "initializer_factor", None)
         if isinstance(module, CLIPTextEmbeddings):
             module.token_embedding.weight.data.normal_(mean=0.0, std=factor * 0.02)
             module.position_embedding.weight.data.normal_(mean=0.0, std=factor * 0.02)
@@ -781,9 +784,13 @@ class CLIPTextModel(CLIPPreTrainedModel):
 
     def __init__(self, config: CLIPTextConfig):
         super().__init__(config)
-        self.text_model = CLIPTextTransformer(config)
-        # Initialize weights and apply final processing
-        self.post_init()
+
+        if isinstance(config, RobertaConfig):
+            self.text_model = RobertaModel(config)
+        else:
+            self.text_model = CLIPTextTransformer(config)
+            # Initialize weights and apply final processing
+            self.post_init()
 
     def forward(
         self,

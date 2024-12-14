@@ -5,9 +5,12 @@ from typing import TypedDict, cast
 import pytorch_lightning as pl
 import torch
 from datasets import Dataset, load_dataset
+from PIL import ImageFile
 from torch import Tensor
 from torch.utils.data import DataLoader
 from transformers import AutoImageProcessor, AutoTokenizer
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class MMSDModelInput(TypedDict, total=False):
@@ -31,7 +34,7 @@ def preprocess(example, image_processor, tokenizer):
         "input_ids": text_inputs["input_ids"],
         "attention_mask": text_inputs["attention_mask"],
         "label": example["label"],
-        "id": example["id"],
+        "id": example["id"] if "id" in example else ["-1"] * len(example["image"]),
     }
 
 
@@ -41,10 +44,12 @@ class MMSDDatasetModule(pl.LightningDataModule):
         self,
         vision_ckpt_name: str,
         text_ckpt_name: str,
+        dataset_name_or_path: str = "",
         dataset_version: str = "mmsd-v2",
         train_batch_size: int = 32,
         val_batch_size: int = 32,
         test_batch_size: int = 32,
+        max_length: int = 128,
         num_workers: int = 19,
     ) -> None:
         super().__init__()
@@ -55,18 +60,22 @@ class MMSDDatasetModule(pl.LightningDataModule):
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.test_batch_size = test_batch_size
+        self.max_length = max_length
         self.num_workers = num_workers
+        self.dataset_name_or_path = dataset_name_or_path
 
     def setup(self, stage: str) -> None:
         # https://stackoverflow.com/questions/62691279/how-to-disable-tokenizers-parallelism-true-false-warning
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
         image_processor = AutoImageProcessor.from_pretrained(self.vision_ckpt_name)
-        tokenizer = AutoTokenizer.from_pretrained(self.text_ckpt_name)
+        tokenizer = AutoTokenizer.from_pretrained(
+            self.text_ckpt_name, model_max_length=self.max_length
+        )
 
         self.dataset = cast(
             Dataset,
-            load_dataset("<username>/MMSD2.0", name=self.dataset_version),
+            load_dataset(self.dataset_name_or_path, name=self.dataset_version),
         )
         self.dataset.set_transform(
             partial(

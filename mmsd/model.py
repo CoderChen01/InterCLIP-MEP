@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from typing import Any, Optional, Tuple, Union, cast
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -8,6 +9,7 @@ from transformers import PretrainedConfig, PreTrainedModel
 from transformers.modeling_outputs import ModelOutput
 
 from mmsd.interactive_clip import CLIPTextModel, CLIPVisionModel
+from mmsd.interactive_roberta import RobertaConfig
 
 logger = logging.getLogger("mmsd.model")
 
@@ -33,7 +35,9 @@ class MMSDConfig(PretrainedConfig):
 
     def __init__(
         self,
-        clip_ckpt_name: Optional[str] = None,
+        clip_vision_model: Optional[str] = None,
+        clip_text_model: Optional[str] = None,
+        is_openclip: bool = False,
         vision_conditional_layer_ids: Optional[list[int]] = None,
         text_conditional_layer_ids: Optional[list[int]] = None,
         vision_embed_dim: Optional[int] = None,
@@ -59,8 +63,10 @@ class MMSDConfig(PretrainedConfig):
             **kwargs,
         )
 
-        if clip_ckpt_name is None:
-            raise ValueError("clip_ckpt_names should be provided.")
+        if clip_vision_model is None:
+            raise ValueError("clip_vision_model should be provided.")
+        if clip_text_model is None:
+            raise ValueError("clip_text_model should be provided.")
         if vision_embed_dim is None or text_embed_dim is None:
             raise ValueError("vision_embed_dim and text_embed_dim should be provided.")
 
@@ -98,13 +104,19 @@ class MMSDConfig(PretrainedConfig):
                 "cond_attn_layer_inds": [],
             }
 
-        self.clip_ckpt_name = clip_ckpt_name
+        self.is_openclip = is_openclip
+        self.clip_vision_model = clip_vision_model
+        self.clip_text_model = clip_text_model
+
         self.vision_conditional_layer_ids = vision_conditional_layer_ids
         self.text_conditional_layer_ids = text_conditional_layer_ids
+
         self.vision_embed_dim = vision_embed_dim
         self.text_embed_dim = text_embed_dim
+
         self.is_v2t_adapter_mlp = is_v2t_adapter_mlp
         self.is_t2v_adapter_mlp = is_t2v_adapter_mlp
+
         self.projection_dim = projection_dim
         self.use_sim_loss = use_sim_loss
 
@@ -134,21 +146,7 @@ class InteractiveCLIP4MMSD(PreTrainedModel):
         super().__init__(config)
         self.config = config
 
-        self.vision_model = cast(
-            CLIPVisionModel,
-            CLIPVisionModel.from_pretrained(
-                config.clip_ckpt_name,
-                task_specific_params=config.vision_task_params,
-            ),
-        )
-
-        self.text_model = cast(
-            CLIPTextModel,
-            CLIPTextModel.from_pretrained(
-                config.clip_ckpt_name,
-                task_specific_params=config.text_task_params,
-            ),
-        )
+        self._init_clip()
 
         if self.config.use_sim_loss:
             self.fuse_projection = nn.Sequential(
@@ -185,6 +183,44 @@ class InteractiveCLIP4MMSD(PreTrainedModel):
             nn.init.zeros_(module.classifier[0].bias)
             nn.init.normal_(module.classifier[2].weight, std=fc2_std)
             nn.init.zeros_(module.classifier[2].bias)
+
+    def _init_clip(self) -> None:
+        if not self.config.is_openclip:
+            self.vision_model = cast(
+                CLIPVisionModel,
+                CLIPVisionModel.from_pretrained(
+                    self.config.clip_vision_model,
+                    task_specific_params=self.config.vision_task_params,
+                ),
+            )
+
+            self.text_model = cast(
+                CLIPTextModel,
+                CLIPTextModel.from_pretrained(
+                    self.config.clip_text_model,
+                    task_specific_params=self.config.text_task_params,
+                ),
+            )
+        else:
+            self.vision_model = cast(
+                CLIPVisionModel,
+                CLIPVisionModel.from_pretrained(
+                    self.config.clip_vision_model,
+                    task_specific_params=self.config.vision_task_params,
+                ),
+            )
+
+            # TODO(chenjunjie): this is a temporary solution
+            config_path = Path(self.config.clip_text_model) / "config.json"
+            config = RobertaConfig.from_json_file(config_path)
+            config.task_specific_params = self.config.text_task_params
+            self.text_model = cast(
+                CLIPTextModel,
+                CLIPTextModel.from_pretrained(
+                    self.config.clip_text_model,
+                    config=config,
+                ),
+            )
 
     def forward(
         self,
