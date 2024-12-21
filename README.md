@@ -1,4 +1,19 @@
-# 😼InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection [![arXiv](https://img.shields.io/badge/arXiv-2406.16464-b31b1b.svg)](https://arxiv.org/abs/2406.16464)
+# 😼 InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection
+
+---
+[![arXiv](https://img.shields.io/badge/arXiv-2406.16464-b31b1b.svg)](https://arxiv.org/abs/2406.16464)
+
+<a href="https://www.junjie-chen.info">Junjie Chen<sup>1,3⁕</sup></a>, <a href="https://scholar.google.com/citations?user=3BLeGSoAAAAJ&hl">Hang Yu<sup>2†</sup></a>, Subin Huang<sup>3‡</sup>, Sanmin Liu<sup>3</sup>, <a href="http://www.zhanglinfeng.tech/">Linfeng Zhang<sup>1</sup></a>
+
+1 Shanghai Jiao Tong University<span style="margin-left: 10px;"></span> 
+2 Shanghai University<span style="margin-left: 10px;"></span> 
+3 Anhui Polytechnic University
+
+† Co-corresponding author<span style="margin-left: 10px;"></span> 
+‡ Corresponding author<span style="margin-left: 10px;"></span> 
+⁕ Junjie is a research assistant at the EPIC Lab of Shanghai Jiao Tong University, working remotely with Linfeng Zhang
+
+---
 
 ## 📄Abstract
 
@@ -134,7 +149,7 @@ If you find this project useful for your research, please consider citing the fo
 ```bibtex
 @misc{chen2024interclipmep,
       title={InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection}, 
-      author={Junjie Chen and Hang Yu and Weidong Liu and Subin Huang and Sanmin Liu and Linfeng Zhang},
+      author={Junjie Chen and Hang Yu and Subin Huang and Sanmin Liu and Linfeng Zhang},
       year={2024},
       eprint={2406.16464},
       archivePrefix={arXiv},
