@@ -1,27 +1,22 @@
-# 😼 InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection
+# [ACM TOMM] InterCLIP-MEP: Interactive CLIP and Memory-Enhanced Predictor for Multi-modal Sarcasm Detection
 
 ---
 [![arXiv](https://img.shields.io/badge/arXiv-2406.16464-b31b1b.svg)](https://arxiv.org/abs/2406.16464)
 
-<a href="https://www.junjie-chen.info">Junjie Chen<sup>1,3⁕</sup></a>, <a href="https://scholar.google.com/citations?user=3BLeGSoAAAAJ&hl">Hang Yu<sup>2†</sup></a>, Subin Huang<sup>3‡</sup>, Sanmin Liu<sup>3</sup>, <a href="http://www.zhanglinfeng.tech/">Linfeng Zhang<sup>1</sup></a>
+<a href="https://www.junjie-chen.info">Junjie Chen<sup>1</sup></a>, <a href="https://scholar.google.com/citations?user=3BLeGSoAAAAJ&hl">Hang Yu<sup>2†</sup></a>, Subin Huang<sup>1‡</sup>, Sanmin Liu<sup>1</sup>, <a href="http://www.zhanglinfeng.tech/">Linfeng Zhang<sup>3</sup></a>
 
-1 Shanghai Jiao Tong University<span style="margin-left: 10px;"></span> 
+1 Anhui Polytechnic University<span style="margin-left: 10px;"></span> 
 2 Shanghai University<span style="margin-left: 10px;"></span> 
-3 Anhui Polytechnic University
+3 Shanghai Jiao Tong University
 
 † Co-corresponding author<span style="margin-left: 10px;"></span> 
 ‡ Corresponding author<span style="margin-left: 10px;"></span> 
-⁕ Junjie is a research assistant at the EPIC Lab of Shanghai Jiao Tong University, working remotely with Linfeng Zhang
 
 ---
 
 ## 📄Abstract
 
-Sarcasm in social media, often expressed through text-image combinations, poses challenges for sentiment analysis and intention mining.
-Current multi-modal sarcasm detection methods have been shown to overestimate performance due to reliance on spurious cues, which fail to effectively capture the intricate interactions between text and images.
-To solve this problem, we propose InterCLIP-MEP, a novel framework for multi-modal sarcasm detection, which introduces Interactive CLIP (InterCLIP) to extract enriched text-image representations by embedding cross-modal information directly into each encoder.
-Additionally, we design a Memory-Enhanced Predictor (MEP) with a dynamic dual-channel memory that stores valuable test sample knowledge during inference, acting as a non-parametric classifier for robust sarcasm recognition.
-Experiments on two benchmarks demonstrate that InterCLIP-MEP achieves state-of-the-art performance, with significant accuracy and F1 score improvements on MMSD and MMSD2.0.
+Sarcasm in social media, frequently conveyed through the interplay of text and images, presents significant challenges for sentiment analysis and intention mining. Existing multi-modal sarcasm detection approaches have been shown to excessively depend on superficial cues within the textual modality, exhibiting limited capability to accurately discern sarcasm through subtle text-image interactions. To address this limitation, a novel framework, InterCLIP-MEP, is proposed. This framework integrates Interactive CLIP (InterCLIP), which employs an efficient training strategy to derive enriched cross-modal representations by embedding inter-modal information directly into each encoder, while using approximately 20.6× fewer trainable parameters compared with existing state-of-the-art (SOTA) methods. Furthermore, a Memory-Enhanced Predictor (MEP) is introduced, featuring a dynamic dual-channel memory mechanism that captures and retains valuable knowledge from test samples during inference, serving as a non-parametric classifier to enhance sarcasm detection robustness. Extensive experiments on MMSD, MMSD2.0, and DocMSU show that InterCLIP-MEP achieves SOTA performance, specifically improving accuracy by 1.08% and F1 score by 1.51% on MMSD2.0. Under distributional shift evaluation, it attains 73.96% accuracy, exceeding its memory-free variant by nearly 10% and the previous SOTA by over 15%, demonstrating superior stability and adaptability. The implementation of InterCLIP-MEP is publicly available at https://github.com/CoderChen01/InterCLIP-MEP.
 
 <center>
 <img src="./docs/framework.svg" alt="Framework overview"/>
